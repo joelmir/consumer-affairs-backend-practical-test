@@ -1,0 +1,21 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pytest = "*"
+yapf = "*"
+pytest-cov = "*"
+ipython = "*"
+
+[packages]
+django = "*"
+djangorestframework = "*"
+
+[requires]
+python_version = "3.6"
+
+[scripts]
+unittests = "pytest -v --cov-config .coveragerc --cov=. --cov-report term-missing tests/"
+format = "yapf -i -r --style google --no-local-style -p -vv ."
