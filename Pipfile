@@ -14,8 +14,8 @@ django = "*"
 djangorestframework = "*"
 
 [requires]
-python_version = "3.6"
+python_version = "3.7"
 
 [scripts]
-unittests = "pytest -v --cov-config .coveragerc --cov=. --cov-report term-missing tests/"
-format = "yapf -i -r --style google --no-local-style -p -vv ."
+unittests = 'pytest -v --cov-config .coveragerc --cov=. --cov-report term-missing tests/'
+format = 'yapf -i -r --style google --no-local-style -p -vv .'
