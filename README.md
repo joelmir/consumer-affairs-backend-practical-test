@@ -29,13 +29,15 @@ Requeriments: **Python 3.7**
 
 -- Using with ```pyenv``` and ```pipenv``` go to the root of the project:
 ```sh
-$ pipenv install
+$ pipenv install --dev
 ```
 
 -- Using with `virtualenv` make sure you are with the environment activated:
 ```sh
 $ pip install -r requirements.txt
 ```
+
+
 All the projects dependeces will be installed
 
 
