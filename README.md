@@ -43,6 +43,12 @@ All the projects dependeces will be installed
 
 **If you are using `pipenv`just add before the commands `pipenv run` or run `pipenv shell` to load the `virtualenv`**
 
+# Setup DB schema
+
+```sh
+$ python manager migrate
+```
+
 # Running the project
 ```sh
 $ python manager runserver
