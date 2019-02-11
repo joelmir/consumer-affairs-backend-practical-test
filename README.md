@@ -43,18 +43,26 @@ All the projects dependeces will be installed
 
 **If you are using `pipenv`just add before the commands `pipenv run` or run `pipenv shell` to load the `virtualenv`**
 
-# Setup DB schema
+# Running the tests
+```sh
+$ pytest
+```
 
+# Setup DB schema
 ```sh
 $ python manager migrate
+```
+
+# Creating superuser to access admin page
+```sh
+$ python manage.py createsuperuser
 ```
 
 # Running the project
 ```sh
 $ python manager runserver
 ```
-# Running the tests
 
-```sh
-$ pytest
-```
+#Access to admin page
+Open your browser and access the url `http://<project host:port>/admin` and use the credentials created before
+
