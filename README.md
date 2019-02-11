@@ -56,5 +56,5 @@ $ python manager runserver
 # Running the tests
 
 ```sh
-
+$ pytest
 ```
