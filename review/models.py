@@ -13,6 +13,7 @@ class Company(models.Model):
 class Review(models.Model):
     RATING_OPTIONS = ((1, '1 star'), (2, '2 stars'), (3, '3 stars'),
                       (4, '4 stars'), (5, '5 stars'))
+    
     rating = models.IntegerField(choices=RATING_OPTIONS)
     title = models.CharField(max_length=64)
     summary = models.CharField(max_length=100000)
