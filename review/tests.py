@@ -10,6 +10,7 @@ from rest_framework import status
 
 from review.models import Company
 from review.models import Review
+from rest_framework.authtoken.models import Token
 
 
 class CompanyModelTest(TestCase):
@@ -35,7 +36,7 @@ class ReviewModelTest(TestCase):
                 summary = 'This is my test review with summary',
                 ip_address = '192.168.0.1',
                 company = company,
-                reviewer = User.objects.create_user(username='User1')
+                reviewer = Token.objects.create(user=User.objects.create_user(username='User1'))
             )
         self.assertEqual(r.title, 'My test review')
         self.assertEqual(r.company, company)
@@ -47,10 +48,10 @@ class ReviewModelTest(TestCase):
                 title = 'My test review',
                 summary = 'This is my test review with summary',
                 ip_address = '192.168.0.1',
-                reviewer = User.objects.create_user(username='User1')
+                reviewer = Token.objects.create(user=User.objects.create_user(username='User1'))
             )
 
-    def test_is_not_possible_create_without_user(self):
+    def test_is_not_possible_create_without_reviwer(self):
         company = Company.objects.create(name='Company 1', description='This is a test company')
 
         with pytest.raises(IntegrityError, match="NOT NULL constraint failed: review_review.reviewer_id"):
@@ -64,8 +65,8 @@ class ReviewModelTest(TestCase):
 
     def test_if_can_get_all_reviews_from_one_user(self):
         company = Company.objects.create(name='Company 1', description='This is a test company')
-        user1 = User.objects.create_user(username='User1')
-        user2 = User.objects.create_user(username='User2')
+        reviewer_1 = Token.objects.create(user=User.objects.create_user(username='User1'))
+        reviewer_2 = Token.objects.create(user=User.objects.create_user(username='User2'))
         
         r1 = Review.objects.create(
             rating = 1,
@@ -73,7 +74,7 @@ class ReviewModelTest(TestCase):
             summary = 'This is my test review with summary',
             ip_address = '192.168.0.1',
             company = company,
-            reviewer = user1
+            reviewer = reviewer_1
         )
 
         r2 = Review.objects.create(
@@ -82,7 +83,7 @@ class ReviewModelTest(TestCase):
             summary = 'This is my test review with summary',
             ip_address = '192.168.0.1',
             company = company,
-            reviewer = user1
+            reviewer = reviewer_1
         )        
 
         r3 = Review.objects.create(
@@ -91,11 +92,11 @@ class ReviewModelTest(TestCase):
             summary = 'This is my test review with summary',
             ip_address = '192.168.0.1',
             company = company,
-            reviewer = user2
+            reviewer = reviewer_2
         )
 
-        self.assertEqual(Review.objects.filter(reviewer=user1).count(), 2)
-        self.assertEqual(Review.objects.filter(reviewer=user2).count(), 1)
+        self.assertEqual(Review.objects.filter(reviewer=reviewer_1).count(), 2)
+        self.assertEqual(Review.objects.filter(reviewer=reviewer_2).count(), 1)
 
 
 class CompanyApiTests(APITestCase):
@@ -125,6 +126,67 @@ class CompanyApiTests(APITestCase):
         c = Company.objects.create(name='test', description='test description')
         response = self.client.delete(f'/company/{c.id}/', format='json')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_is_possible_create_review_for_a_new_company(self):
+        '''
+        Ensure we can create a review with a new user
+        '''
+        response = self.client.post('/review/', format='json', data=
+            {
+                "rating": 1,
+                "title": "asdf",
+                "summary": "asdf",
+                "company": {
+                    "name": "asdf",
+                    "description": "asdf"
+                },
+                "reviewer": {
+                    "user": {
+                        "username": "asdf",
+                        "email": "asdf@asdf.com"
+                    }
+                }
+            })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)       
+
+    def test_is_possible_create_two_reviews_for_the_same_company(self):
+        '''
+        Ensure we can create a review with a new user
+        '''
+        response = self.client.post('/review/', format='json', data=
+            {
+                "rating": 1,
+                "title": "asdf",
+                "summary": "asdf",
+                "company": {
+                    "name": "asdf",
+                    "description": "asdf"
+                },
+                "reviewer": {
+                    "user": {
+                        "username": "asdf",
+                        "email": "asdf@asdf.com"
+                    }
+                }
+            })
+        response = self.client.post('/review/', format='json', data=
+            {
+                "rating": 2,
+                "title": "asdf - asdf",
+                "summary": "asdf - asdf",
+                "company": {
+                    "name": "asdf",
+                    "description": "asdf"
+                },
+                "reviewer": {
+                    "user": {
+                        "username": "asdf",
+                        "email": "asdf@asdf.com"
+                    }
+                }
+            })
+        print(response.json())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
 
 
