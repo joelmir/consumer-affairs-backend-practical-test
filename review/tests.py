@@ -1,8 +1,12 @@
 import pytest
 from django.test import TestCase
+from django.urls import include, path, reverse
 from django.db.utils import IntegrityError
 from django.contrib.auth.models import User
 from django.db.models import Count
+
+from rest_framework.test import APITestCase, URLPatternsTestCase
+from rest_framework import status
 
 from review.models import Company
 from review.models import Review
@@ -92,4 +96,48 @@ class ReviewModelTest(TestCase):
 
         self.assertEqual(Review.objects.filter(reviewer=user1).count(), 2)
         self.assertEqual(Review.objects.filter(reviewer=user2).count(), 1)
+
+
+class CompanyApiTests(APITestCase):
+    
+    def test_can_get_all_companies(self):
+        '''
+        Ensure we can get all companies.
+        '''
+
+        Company.objects.create(name='test', description='test description')
+
+        response = self.client.get('/company/', format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+
+    def test_can_create_one_company(self):
+        '''
+        Ensure we can create a company by API
+        '''
+        response = self.client.post('/company/', format='json', data={'name': 'test', 'description':'test description'})
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_can_delete_company(self):
+        '''
+        Ensure we can delete a company already created
+        '''
+        c = Company.objects.create(name='test', description='test description')
+        response = self.client.delete(f'/company/{c.id}/', format='json')
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
