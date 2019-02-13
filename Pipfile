@@ -13,7 +13,6 @@ pytest-django = "*"
 [packages]
 django = "*"
 djangorestframework = "*"
-django-rest-auth = "*"
 
 [requires]
 python_version = "3.7"

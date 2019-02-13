@@ -28,5 +28,4 @@ router.register(r'review', views.ReviewViewSet, basename='review')
 urlpatterns = [
     path('', include(router.urls)),
     path('admin/', admin.site.urls),
-    path('rest-auth/', include('rest_auth.urls')),
 ]
