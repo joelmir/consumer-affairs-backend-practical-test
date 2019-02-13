@@ -1,18 +1,10 @@
 from rest_framework.authtoken.models import Token
 from rest_framework import viewsets
-from review.serializers import TokenSerializer, CompanySerializer, ReviewSerializer
+from rest_framework.response import Response
 
+from review.serializers import CompanySerializer, ReviewSerializer
 from review.models import Company
 from review.models import Review
-
-class UserViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows users to be viewed or edited.
-    """
-    queryset = Token.objects.all().order_by('key')
-    serializer_class = TokenSerializer
-    http_method_names = ['get']
-
 
 class CompanyViewSet(viewsets.ModelViewSet):
     """
@@ -20,10 +12,26 @@ class CompanyViewSet(viewsets.ModelViewSet):
     """
     queryset = Company.objects.all().order_by('name')
     serializer_class = CompanySerializer
-
-class ReviewViewSet(viewsets.ModelViewSet):
+    http_method_names = ['get']
+    
+class ReviewViewSet(viewsets.ViewSet):
     """
     API endpoint that allows reviews to be viewed or edited.
     """
-    queryset = Review.objects.all().order_by('submission_date')
-    serializer_class = ReviewSerializer
+    http_method_names = ['get', 'post']
+
+    def list(self, request):
+        reviwer = Token.objects.get(user=request.user)
+        queryset = Review.objects.filter(reviewer=reviwer).order_by('submission_date')
+        serializer = ReviewSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def create(self, request):
+        request_data = request.data
+        request_data['reviewer'] = {'user': {'username': request.user.username, 'email': request.user.email}, 'key': '-'}
+        serializer = ReviewSerializer(data=request_data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=500)
+        serializer.save()
+        return Response(serializer.data, status=201)
+        

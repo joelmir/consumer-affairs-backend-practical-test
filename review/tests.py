@@ -100,6 +100,14 @@ class ReviewModelTest(TestCase):
 
 
 class CompanyApiTests(APITestCase):
+
+    def setUp(self):
+        self.superuser1 = User.objects.create_superuser('john', 'john@snow.com', 'localpass1')
+        self.superuser2 = User.objects.create_superuser('drika', 'drika@borne.com', 'localpass2')
+        self.token1 = Token.objects.create(user=self.superuser1)
+        self.client.login(username='john', password='localpass1')
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token1.key)
+
     
     def test_can_get_all_companies(self):
         '''
@@ -111,21 +119,6 @@ class CompanyApiTests(APITestCase):
         response = self.client.get('/company/', format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
-
-    def test_can_create_one_company(self):
-        '''
-        Ensure we can create a company by API
-        '''
-        response = self.client.post('/company/', format='json', data={'name': 'test', 'description':'test description'})
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-    def test_can_delete_company(self):
-        '''
-        Ensure we can delete a company already created
-        '''
-        c = Company.objects.create(name='test', description='test description')
-        response = self.client.delete(f'/company/{c.id}/', format='json')
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_is_possible_create_review_for_a_new_company(self):
         '''
@@ -139,19 +132,13 @@ class CompanyApiTests(APITestCase):
                 "company": {
                     "name": "asdf",
                     "description": "asdf"
-                },
-                "reviewer": {
-                    "user": {
-                        "username": "asdf",
-                        "email": "asdf@asdf.com"
-                    }
                 }
             })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)       
 
     def test_is_possible_create_two_reviews_for_the_same_company(self):
         '''
-        Ensure we can create a review with a new user
+        Ensure we can create a review with the same company
         '''
         response = self.client.post('/review/', format='json', data=
             {
@@ -161,12 +148,6 @@ class CompanyApiTests(APITestCase):
                 "company": {
                     "name": "asdf",
                     "description": "asdf"
-                },
-                "reviewer": {
-                    "user": {
-                        "username": "asdf",
-                        "email": "asdf@asdf.com"
-                    }
                 }
             })
         response = self.client.post('/review/', format='json', data=
@@ -177,17 +158,67 @@ class CompanyApiTests(APITestCase):
                 "company": {
                     "name": "asdf",
                     "description": "asdf"
-                },
-                "reviewer": {
-                    "user": {
-                        "username": "asdf",
-                        "email": "asdf@asdf.com"
-                    }
                 }
             })
-        print(response.json())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+    def test_is_possible_separate_reviews_from_users(self):
+        '''
+        Ensure we can create a review for different users
+        '''
+        response = self.client.post('/review/', format='json', data=
+            {
+                "rating": 1,
+                "title": "asdf",
+                "summary": "asdf",
+                "company": {
+                    "name": "asdf",
+                    "description": "asdf"
+                }
+            })
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = self.client.get('/review/', format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+
+        self.token2 = Token.objects.create(user=self.superuser2)
+        self.client.login(username='drika', password='localpass2')
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token2.key)
+        
+        response = self.client.post('/review/', format='json', data=
+            {
+                "rating": 2,
+                "title": "asdf - asdf",
+                "summary": "asdf - asdf",
+                "company": {
+                    "name": "asdf",
+                    "description": "asdf"
+                }
+            })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = self.client.get('/review/', format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+
+        self.assertEqual(Review.objects.filter(reviewer=self.token1).count(), 1)
+        self.assertEqual(Review.objects.filter(reviewer=self.token2).count(), 1)
+        self.assertEqual(Review.objects.all().count(), 2)
+
+    def test_is_not_possible_save_invalid_data_without_title(self):
+        '''
+        Ensure we can create a review for different users
+        '''
+        response = self.client.post('/review/', format='json', data=
+            {
+                "rating": 1,
+                "summary": "asdf",
+                "company": {
+                    "name": "asdf",
+                    "description": "asdf"
+                }
+            })
+        self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 

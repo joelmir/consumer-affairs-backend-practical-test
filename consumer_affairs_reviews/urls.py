@@ -20,13 +20,13 @@ from rest_framework import routers
 from review import views
 
 router = routers.DefaultRouter()
-router.register(r'users', views.UserViewSet)
-router.register(r'company', views.CompanyViewSet)
-router.register(r'review', views.ReviewViewSet)
+router.register(r'company', views.CompanyViewSet, basename='company')
+router.register(r'review', views.ReviewViewSet, basename='review')
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
     path('', include(router.urls)),
     path('admin/', admin.site.urls),
+    path('rest-auth/', include('rest_auth.urls')),
 ]
