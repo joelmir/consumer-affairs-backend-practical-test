@@ -1,13 +1,17 @@
 import pytest
 from django.test import TestCase
+from django.test import Client
+from django.test.client import RequestFactory
 from django.urls import include, path, reverse
 from django.db.utils import IntegrityError
 from django.contrib.auth.models import User
+from django.contrib.admin.sites import AdminSite
 from django.db.models import Count
 
 from rest_framework.test import APITestCase, URLPatternsTestCase
 from rest_framework import status
 
+from review.admin import ReviewAdmin
 from review.models import Company
 from review.models import Review
 from rest_framework.authtoken.models import Token
@@ -242,11 +246,45 @@ class CompanyApiTests(APITestCase):
 
 
 
+class ReviewAdminModelTest(TestCase):
+    
+    def setUp(self):
+        # Every test needs access to the request factory.
+        self.factory = RequestFactory()
+        
+    def test_if_filter_url_by_logged_user(self):
 
+        normaluser = User.objects.create_user(
+            username='john', email='john@snow.com', password='localpass1')
+        token = Token.objects.create(user=normaluser)
 
+        # Create an instance of a GET request.
+        request = self.factory.get('/admin/review/review/')
+        request.user = normaluser
 
+        adm_rev = ReviewAdmin(Review, AdminSite())
+        adm_rev.get_queryset(request)
 
+        query = str(adm_rev.get_queryset(request).query)
 
+        self.assertEqual(query.split('WHERE')[1].strip(), f'"review_review"."reviewer_id" = {token.key}')
+
+    def test_if_filter_url_by_logged_superuser(self):
+
+        normaluser = User.objects.create_superuser(
+            username='john', email='john@snow.com', password='localpass1')
+        token = Token.objects.create(user=normaluser)
+
+        # Create an instance of a GET request.
+        request = self.factory.get('/admin/review/review/')
+        request.user = normaluser
+
+        adm_rev = ReviewAdmin(Review, AdminSite())
+        adm_rev.get_queryset(request)
+
+        query = str(adm_rev.get_queryset(request).query)
+
+        self.assertTrue('WHERE' not in query)
 
 
 
