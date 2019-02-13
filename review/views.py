@@ -29,6 +29,9 @@ class ReviewViewSet(viewsets.ViewSet):
     def create(self, request):
         request_data = request.data
         request_data['reviewer'] = {'user': {'username': request.user.username, 'email': request.user.email}, 'key': '-'}
+        # GET request IP
+        request_data['ip_address'] = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR')).split(',')[0]
+            
         serializer = ReviewSerializer(data=request_data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=500)

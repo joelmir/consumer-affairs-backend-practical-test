@@ -26,7 +26,6 @@ class CompanyReviewSerializer(serializers.Serializer):
 class ReviewSerializer(serializers.ModelSerializer):
     company = CompanyReviewSerializer()
     reviewer = TokenSerializer()
-    ip_address = serializers.StringRelatedField(read_only=True)
     
     class Meta:
         model = Review

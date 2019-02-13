@@ -220,7 +220,25 @@ class CompanyApiTests(APITestCase):
             })
         self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    
+    def test_if_can_save_the_ip_from_requests(self):
+        '''
+        Ensure we can save the review with the IP address 
+        '''
+        response = self.client.post('/review/', format='json', data=
+            {
+                "rating": 1,
+                "title": "asdf",
+                "summary": "asdf",
+                "company": {
+                    "name": "asdf",
+                    "description": "asdf"
+                }
+            })
 
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        review = Review.objects.filter(reviewer=self.token1).first()
+        self.assertEqual(review.ip_address, '127.0.0.1')
 
 
 
