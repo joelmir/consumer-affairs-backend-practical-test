@@ -63,10 +63,10 @@ $ python manage.py createsuperuser
 $ python manager runserver
 ```
 
-#Access to admin page
+# Access to admin page
 Open your browser and access the url `http://<project host:port>/admin` and use the credentials created before
 
-#Setup basic informations
+# Setup basic informations
 After logged at admin with the user created before, click on `Tokens` link inside the `AUTH TOKEN` session.
 
  - To create new tokens for existent users, click on the top righ link `ADD TOKEN +`, select the user and click on save
@@ -75,7 +75,7 @@ After logged at admin with the user created before, click on `Tokens` link insid
  In that session is possible see all the tokens allowed for the users in the requests.
  **Use this page to get token info used to authorize the API** 
 
-#API
+# API
 
 **Make sure to have a token already generated at admin (previews step)**
 
@@ -140,5 +140,5 @@ This will return the list of reviews created by the user
     "key":<user token from admin>}}]
 ```
 
-#Bonus task
+# Bonus task
 If enable the user to use admin with review access, the user will just see yours reviews, although if the user is a superuser, in that case the user will see all reviews created.
