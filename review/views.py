@@ -8,7 +8,7 @@ from review.models import Review
 
 class CompanyViewSet(viewsets.ModelViewSet):
     """
-    API endpoint that allows companies to be viewed or edited.
+    API endpoint that allows companies to be viewed
     """
     queryset = Company.objects.all().order_by('name')
     serializer_class = CompanySerializer
@@ -21,12 +21,18 @@ class ReviewViewSet(viewsets.ViewSet):
     http_method_names = ['get', 'post']
 
     def list(self, request):
+        '''
+        Return the list of Reviews for the user authenticated by token
+        '''
         reviwer = Token.objects.get(user=request.user)
         queryset = Review.objects.filter(reviewer=reviwer).order_by('submission_date')
         serializer = ReviewSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def create(self, request):
+        '''
+        Create a new review using the user authenticated by token
+        '''
         request_data = request.data
         request_data['reviewer'] = {'user': {'username': request.user.username, 'email': request.user.email}, 'key': '-'}
         # GET request IP
