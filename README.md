@@ -66,3 +66,79 @@ $ python manager runserver
 #Access to admin page
 Open your browser and access the url `http://<project host:port>/admin` and use the credentials created before
 
+#Setup basic informations
+After logged at admin with the user created before, click on `Tokens` link inside the `AUTH TOKEN` session.
+
+ - To create new tokens for existent users, click on the top righ link `ADD TOKEN +`, select the user and click on save
+ - To create new tokens for a new user, click on the top righ link `ADD TOKEN +`, setup a new user and click on save
+
+ In that session is possible see all the tokens allowed for the users in the requests.
+ **Use this page to get token info used to authorize the API** 
+
+#API
+
+**Make sure to have a token already generated at admin (previews step)**
+
+**List all the APIs available** 
+```sh
+$ curl -H "Content-type: application/json" -H 'Authorization: Token <user token from admin>' 'http://127.0.0.1:8000/'
+```
+this will return
+```javascript
+{"company":"http://127.0.0.1:8000/company/","review":"http://127.0.0.1:8000/review/"}
+```
+
+**Create new review**
+```sh
+$ curl -XPOST -H "Content-type: application/json" -H 'Authorization: Token <user token from admin>' -d '{
+    "rating": 4,
+    "title": "My first review",
+    "summary": "This is my first review for this API",
+    "company": {
+        "name": "google",
+        "description": "provide add everywhere"
+    }
+ }' 'http://127.0.0.1:8000/review/'
+```
+this will return the review created
+```javascript
+{
+    "rating":4,
+    "title":"My first review",
+    "summary":"This is my first review for this API",
+    "ip_address":"127.0.0.1",
+    "submission_date":"2019-02-13T11:31:11.322733Z",
+    "company":{
+        "name":"google",
+        "description":"provide add everywhere"},
+    "reviewer":{
+        "user":{
+            "username":"test",
+            "email":""},
+    "key":<user token from admin>}}
+```
+
+**List all reviews create by the user**
+```sh
+$ curl -H "Content-type: application/json" -H 'Authorization: Token <user token from admin>' 'http://127.0.0.1:8000/review/'
+```
+This will return the list of reviews created by the user
+```javascript
+[{
+    "rating":4,
+    "title":"My first review",
+    "summary":"This is my first review for this API",
+    "ip_address":"127.0.0.1",
+    "submission_date":"2019-02-13T11:31:11.322733Z",
+    "company":{
+        "name":"google",
+        "description":"provide add everywhere"},
+    "reviewer":{
+        "user":{
+            "username":"test",
+            "email":""},
+    "key":<user token from admin>}}]
+```
+
+#Bonus task
+If enable the user to use admin with review access, the user will just see yours reviews, although if the user is a superuser, in that case the user will see all reviews created.
